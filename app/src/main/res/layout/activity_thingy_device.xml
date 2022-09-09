@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,23 +7,117 @@
     tools:context=".ThingyDeviceActivity"
     android:orientation="vertical">
 
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <TextView
         android:id="@+id/status"
         android:layout_marginLeft="100dp"
         android:layout_marginRight="100dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="40dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Status"
-        android:textSize="30sp"
+        android:textSize="20sp"
         android:textAlignment="center"
         android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/roadType"
+        android:layout_marginLeft="100dp"
+        android:layout_marginRight="100dp"
+        android:layout_marginTop="50dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Road Type"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:gravity="center"/>
+
+    <RadioGroup
+        android:id="@+id/roadTypeGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/smoothRoad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Smooth"
+            android:textSize="15sp"
+            android:onClick="onRadioButtonClicked"/>
+
+        <RadioButton
+            android:id="@+id/tilesRoad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Tiles"
+            android:textSize="15sp"
+            android:onClick="onRadioButtonClicked"/>
+
+        <RadioButton
+            android:id="@+id/unpavedRoad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Unpaved"
+            android:textSize="15sp"
+            android:onClick="onRadioButtonClicked"/>
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/roadRoughness"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginRight="100dp"
+        android:gravity="center"
+        android:text="Road Roughness"
+        android:textAlignment="center"
+        android:textSize="20sp" />
+
+    <RadioGroup
+        android:id="@+id/roughnessGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioButton
+            android:id="@+id/goodRoad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Good"
+            android:textSize="15sp"
+            android:onClick="onRadioButtonClicked"/>
+        <RadioButton
+            android:id="@+id/mediumRoad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Medium"
+            android:textSize="15sp"
+            android:onClick="onRadioButtonClicked"/>
+        <RadioButton
+            android:id="@+id/badRoad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Bad"
+            android:textSize="15sp"
+            android:onClick="onRadioButtonClicked"/>
+    </RadioGroup>
 
     <Button
         android:id="@+id/exportButton"
         android:layout_marginLeft="100dp"
         android:layout_marginRight="100dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="50dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/exportButton"
@@ -32,5 +126,5 @@
         android:gravity="center"/>
 
 
-
 </LinearLayout>
+</ScrollView>

@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +41,9 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
     private ThingyListener thingyListener;
     private LocationManager locationManager;
     private Button exportButton;
+    private RadioButton smoothRd, tilesRd, unpavedRd, goodRd, mediumRd, badRd;
+    private int roadTypeInt = -1;
+    private int roadQualityInt = -1;
 
     private TextView status;
 
@@ -62,6 +66,12 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
         setContentView(R.layout.activity_thingy_device);
         status = (TextView) findViewById(R.id.status);
         exportButton = (Button) findViewById(R.id.exportButton);
+        smoothRd = (RadioButton) findViewById(R.id.smoothRoad);
+        tilesRd = (RadioButton) findViewById(R.id.tilesRoad);
+        unpavedRd = (RadioButton) findViewById(R.id.unpavedRoad);
+        goodRd = (RadioButton) findViewById(R.id.goodRoad);
+        mediumRd = (RadioButton) findViewById(R.id.mediumRoad);
+        badRd = (RadioButton) findViewById(R.id.badRoad);
         first = true;
         // TODO 2: Get the BluetoothDevice from the intent
         Intent intent = getIntent();
@@ -149,7 +159,7 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
                     Log.i(TAG, "Accz = " + z);
                     timeStamp = String.valueOf(System.currentTimeMillis());
                     first = false;
-                    String[] acc_entries = {timeStamp, String.valueOf(x), String.valueOf(y), String.valueOf(z)};
+                    String[] acc_entries = {timeStamp, String.valueOf(x), String.valueOf(y), String.valueOf(z), String.valueOf(roadTypeInt),String.valueOf(roadQualityInt)};
 //                    accEntry.add(acc_entries);
                     CSV_write("acc",acc_entries);
                 }
@@ -322,5 +332,53 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
         String[] gps_entries = {timeStamp, String.valueOf(location.getLatitude()),String.valueOf(location.getLongitude()),"0"};
 //        gpsEntry.add(gps_entries);
         if(exportFlag)CSV_write("gps", gps_entries);
+    }
+
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+        String strType ="";
+        String strQty="";
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.smoothRoad:
+                if (checked) {
+                    roadTypeInt = 0;
+                    strType = "Smooth Road selected.";
+                }
+                    break;
+            case R.id.tilesRoad:
+                if (checked) {
+                    roadTypeInt = 1;
+                    strType = "Tiles Road selected.";
+                }
+                    break;
+            case R.id.unpavedRoad:
+                if (checked) {
+                    roadTypeInt = 2;
+                    strType = "Unpaved Road selected.";
+                }
+                    break;
+            case R.id.goodRoad:
+                if (checked) {
+                    roadQualityInt = 0;
+                    strQty = "Good Road selected.";
+                }
+                    break;
+            case R.id.mediumRoad:
+                if (checked) {
+                    roadQualityInt = 1;
+                    strQty = "Medium Road selected.";
+                }
+                    break;
+            case R.id.badRoad:
+                if (checked) {
+                    roadQualityInt = 2;
+                    strQty = "Bad Road selected.";
+                }
+                    break;
+        }
+        Toast.makeText(getApplicationContext(), strType+"\t"+strQty, Toast.LENGTH_LONG).show();
     }
 }
