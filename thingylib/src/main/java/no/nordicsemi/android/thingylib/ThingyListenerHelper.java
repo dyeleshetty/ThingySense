@@ -262,12 +262,14 @@ public class ThingyListenerHelper {
                         globalListener.onAccelerometerValueChangedEvent(device, accelerometerX, accelerometerY, accelerometerZ);
                         globalListener.onGyroscopeValueChangedEvent(device, gyroscopeX, gyroscopeY, gyroscopeZ);
                         globalListener.onCompassValueChangedEvent(device, compassX, compassY, compassZ);
+                        globalListener.onMotionChangedEvent(device, accelerometerX, accelerometerY, accelerometerZ, gyroscopeX, gyroscopeY, gyroscopeZ, compassX, compassY, compassZ);
                     }
 
                     if(thingyListener != null) {
                         thingyListener.onAccelerometerValueChangedEvent(device, accelerometerX, accelerometerY, accelerometerZ);
                         thingyListener.onGyroscopeValueChangedEvent(device, gyroscopeX, gyroscopeY, gyroscopeZ);
                         thingyListener.onCompassValueChangedEvent(device, compassX, compassY, compassZ);
+                        thingyListener.onMotionChangedEvent(device, accelerometerX, accelerometerY, accelerometerZ, gyroscopeX, gyroscopeY, gyroscopeZ, compassX, compassY, compassZ);
                     }
                     break;
                 case ThingyUtils.EULER_NOTIFICATION:

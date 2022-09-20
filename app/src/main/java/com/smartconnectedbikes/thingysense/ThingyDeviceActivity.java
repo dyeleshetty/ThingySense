@@ -13,6 +13,10 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -34,7 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySdkManager.ServiceConnectionListener, LocationListener {
+public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySdkManager.ServiceConnectionListener, LocationListener, SensorEventListener {
     private static final String TAG = ThingyDeviceActivity.class.getName();
     private BluetoothDevice bluetoothDevice;
     private ThingySdkManager thingySdkManager;
@@ -53,12 +57,16 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
     private String timeStamp;
     private boolean first = true;
     private boolean exportFlag = false;
-    private ArrayList<String[]> accEntry = new ArrayList<String[]>();
-    private ArrayList<String[]> gyrEntry = new ArrayList<String[]>();
-    private ArrayList<String[]> comEntry = new ArrayList<String[]>();
-    private ArrayList<String[]> gpsEntry = new ArrayList<String[]>();
+    private float[] mAccEntry = {0,0,0};
+    private float[] mGyrEntry = {0,0,0};
+    private float[] mComEntry = {0,0,0};
+    private long mSensorTimeStamp;
+
 
     private Location mLocation;
+
+    private SensorManager senSensorManager;
+    private Sensor senAccelerometer, senGyroscope, senCompass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,11 +81,30 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
         mediumRd = (RadioButton) findViewById(R.id.mediumRoad);
         badRd = (RadioButton) findViewById(R.id.badRoad);
         first = true;
+        senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        senGyroscope = senSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        senCompass = senSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
+        senSensorManager.registerListener(this, senGyroscope , SensorManager.SENSOR_DELAY_NORMAL);
+        senSensorManager.registerListener(this, senCompass , SensorManager.SENSOR_DELAY_NORMAL);
+
         // TODO 2: Get the BluetoothDevice from the intent
         Intent intent = getIntent();
         bluetoothDevice = intent.getParcelableExtra(MainActivity.BLUETOOTH_DEVICE_KEY);
         // TODO 3: Get an instance of ThingySdkManager using ThingySdkManager.getInstance()
         thingySdkManager = ThingySdkManager.getInstance();
+
+        if (ActivityCompat.checkSelfPermission((Activity) this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) this, new String[]{
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+            }, 10);
+        }
+
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        mLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
          thingyListener = new ThingyListener() {
             @Override
@@ -153,42 +180,42 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
 
             @Override
             public void onAccelerometerValueChangedEvent(BluetoothDevice bluetoothDevice, float x, float y, float z) {
-                if(exportFlag) {
-                    Log.i(TAG, "Accx = " + x);
-                    Log.i(TAG, "Accy = " + y);
-                    Log.i(TAG, "Accz = " + z);
-                    timeStamp = String.valueOf(System.currentTimeMillis());
-                    first = false;
-                    String[] acc_entries = {timeStamp, String.valueOf(x), String.valueOf(y), String.valueOf(z), String.valueOf(roadTypeInt),String.valueOf(roadQualityInt)};
-//                    accEntry.add(acc_entries);
-                    CSV_write("acc",acc_entries);
-                }
-                else status.setText("Connection Successful.");
+//                if(exportFlag) {
+//                    Log.i(TAG, "Accx = " + x);
+//                    Log.i(TAG, "Accy = " + y);
+//                    Log.i(TAG, "Accz = " + z);
+//                    timeStamp = String.valueOf(System.currentTimeMillis());
+//                    first = false;
+//                    String[] acc_entries = {timeStamp, String.valueOf(x), String.valueOf(y), String.valueOf(z), String.valueOf(roadTypeInt),String.valueOf(roadQualityInt)};
+////                    accEntry.add(acc_entries);
+//                    CSV_write("acc",acc_entries);
+//                }
+//                else status.setText("Connection Successful.");
             }
 
             @Override
             public void onGyroscopeValueChangedEvent(BluetoothDevice bluetoothDevice, float x, float y, float z) {
-                if(exportFlag){
-                    Log.i(TAG, "Gyrx = " + x);
-                    Log.i(TAG, "Gyry = " + y);
-                    Log.i(TAG, "Gyrz = " + z);
-                    String[] gyr_entries = {timeStamp,String.valueOf(x), String.valueOf(y), String.valueOf(z)};
-//                    gyrEntry.add(gyr_entries);
-                    CSV_write("gyr",gyr_entries);
-                }
+//                if(exportFlag){
+//                    Log.i(TAG, "Gyrx = " + x);
+//                    Log.i(TAG, "Gyry = " + y);
+//                    Log.i(TAG, "Gyrz = " + z);
+//                    String[] gyr_entries = {timeStamp,String.valueOf(x), String.valueOf(y), String.valueOf(z)};
+////                    gyrEntry.add(gyr_entries);
+//                    CSV_write("gyr",gyr_entries);
+//                }
 
             }
 
             @Override
             public void onCompassValueChangedEvent(BluetoothDevice bluetoothDevice, float x, float y, float z) {
-                if(exportFlag){
-                    Log.i(TAG, "Comx = " + x);
-                    Log.i(TAG, "Comy = " + y);
-                    Log.i(TAG, "Comz = " + z);
-                    String[] com_entries = {timeStamp, String.valueOf(x), String.valueOf(y), String.valueOf(z)};
-//                    comEntry.add(com_entries);
-                    CSV_write("com",com_entries);
-                }
+//                if(exportFlag){
+//                    Log.i(TAG, "Comx = " + x);
+//                    Log.i(TAG, "Comy = " + y);
+//                    Log.i(TAG, "Comz = " + z);
+//                    String[] com_entries = {timeStamp, String.valueOf(x), String.valueOf(y), String.valueOf(z)};
+////                    comEntry.add(com_entries);
+//                    CSV_write("com",com_entries);
+//                }
 
 
             }
@@ -222,7 +249,37 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
             public void onMicrophoneValueChangedEvent(BluetoothDevice bluetoothDevice, byte[] data) {
 
             }
-        };
+
+             @Override
+             public void onMotionChangedEvent(BluetoothDevice bluetoothDevice, float xa, float ya, float za, float xg, float yg, float zg, float xc, float yc, float zc) {
+                 if(exportFlag) {
+                     Log.i(TAG, "Accx = " + xa);
+                     Log.i(TAG, "Accy = " + ya);
+                     Log.i(TAG, "Accz = " + za);
+                     Log.i(TAG, "Gyrx = " + xg);
+                     Log.i(TAG, "Gyry = " + yg);
+                     Log.i(TAG, "Gyrz = " + zg);
+                     Log.i(TAG, "Comx = " + xc);
+                     Log.i(TAG, "Comy = " + yc);
+                     Log.i(TAG, "Comz = " + zc);
+                     Log.i(TAG,"Lat = " + String.valueOf(mLocation.getLatitude()));
+                     Log.i(TAG,"Lon = " + String.valueOf(mLocation.getLongitude()));
+                     timeStamp = String.valueOf(System.currentTimeMillis());
+                     first = false;
+                     String[] acc_entries = {timeStamp, String.valueOf(xa), String.valueOf(ya), String.valueOf(za),
+                             String.valueOf(xg), String.valueOf(yg), String.valueOf(zg),
+                             String.valueOf(xc), String.valueOf(yc), String.valueOf(zc), "\t",
+                             String.valueOf(mSensorTimeStamp), String.valueOf(mLocation.getLatitude()), String.valueOf(mLocation.getLongitude()),
+                             String.valueOf(mAccEntry[0]), String.valueOf(mAccEntry[1]), String.valueOf(mAccEntry[2]),
+                             String.valueOf(mGyrEntry[0]), String.valueOf(mGyrEntry[1]), String.valueOf(mGyrEntry[2]),
+                             String.valueOf(mComEntry[0]), String.valueOf(mComEntry[1]), String.valueOf(mComEntry[2]),
+                             String.valueOf(roadTypeInt), String.valueOf(roadQualityInt)};
+//                    accEntry.add(acc_entries);
+                     CSV_write("out",acc_entries);
+                 }
+                 else status.setText("Connection Successful.");
+             }
+         };
          exportButton.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
@@ -233,16 +290,7 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
                  }
              }
          });
-        if (ActivityCompat.checkSelfPermission((Activity) this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) this, new String[]{
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-            }, 10);
-        }
 
-
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        mLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     }
 
     @Override
@@ -331,7 +379,8 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
     public void onLocationChanged(@NonNull Location location) {
         String[] gps_entries = {timeStamp, String.valueOf(location.getLatitude()),String.valueOf(location.getLongitude()),"0"};
 //        gpsEntry.add(gps_entries);
-        if(exportFlag)CSV_write("gps", gps_entries);
+        mLocation = location;
+//        if(exportFlag)CSV_write("gps", gps_entries);
     }
 
     public void onRadioButtonClicked(View view) {
@@ -379,6 +428,33 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
                 }
                     break;
         }
-        Toast.makeText(getApplicationContext(), strType+"\t"+strQty, Toast.LENGTH_LONG).show();
+//        Toast.makeText(getApplicationContext(), strType+"\t"+strQty, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        Sensor sensor = sensorEvent.sensor;
+        mSensorTimeStamp = sensorEvent.timestamp;
+        if(sensor.getType()==Sensor.TYPE_ACCELEROMETER) {
+            mAccEntry[0] = sensorEvent.values[0];
+            mAccEntry[1] = sensorEvent.values[1];
+            mAccEntry[2] = sensorEvent.values[2];
+        }
+        if(sensor.getType()==Sensor.TYPE_GYROSCOPE) {
+            mGyrEntry[0] = sensorEvent.values[0];
+            mGyrEntry[1] = sensorEvent.values[1];
+            mGyrEntry[2] = sensorEvent.values[2];
+        }
+        if(sensor.getType()==Sensor.TYPE_MAGNETIC_FIELD) {
+            mComEntry[0] = sensorEvent.values[0];
+            mComEntry[1] = sensorEvent.values[1];
+            mComEntry[2] = sensorEvent.values[2];
+        }
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
     }
 }

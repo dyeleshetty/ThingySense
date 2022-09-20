@@ -87,4 +87,7 @@ public interface ThingyListener  {
     void onSpeakerStatusValueChangedEvent(final BluetoothDevice bluetoothDevice, final int status);
 
     void onMicrophoneValueChangedEvent(final BluetoothDevice bluetoothDevice, final byte [] data);
+
+    void onMotionChangedEvent(final BluetoothDevice bluetoothDevice, final float xa, final float ya, final float za,
+                              final float xg, final float yg, final float zg, final float xc, final float yc, final float zc);
 }
