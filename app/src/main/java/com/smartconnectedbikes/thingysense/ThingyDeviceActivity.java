@@ -105,6 +105,8 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         mLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//        mLocation = locationManager.getCurrentLocation();
+        Log.i(TAG,"Location acquired: Lat = "+String.valueOf(mLocation.getLatitude()));
 
          thingyListener = new ThingyListener() {
             @Override
@@ -120,6 +122,8 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
             @Override
             public void onServiceDiscoveryCompleted(BluetoothDevice device) {
                 thingySdkManager.enableRawDataNotifications(device,true);
+                //The below line could potentially change the sampling frequency!!
+                thingySdkManager.setMotionConfigurationCharacteristic(device, 100, 100,10,100, 0x00);
 
             }
 
@@ -264,6 +268,7 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
                      Log.i(TAG, "Comz = " + zc);
                      Log.i(TAG,"Lat = " + String.valueOf(mLocation.getLatitude()));
                      Log.i(TAG,"Lon = " + String.valueOf(mLocation.getLongitude()));
+                     Log.i(TAG,"Speed = " + String.valueOf(mLocation.getSpeed()));
                      timeStamp = String.valueOf(System.currentTimeMillis());
                      first = false;
                      String[] acc_entries = {timeStamp, String.valueOf(xa), String.valueOf(ya), String.valueOf(za),
@@ -273,7 +278,7 @@ public class ThingyDeviceActivity extends AppCompatActivity implements  ThingySd
                              String.valueOf(mAccEntry[0]), String.valueOf(mAccEntry[1]), String.valueOf(mAccEntry[2]),
                              String.valueOf(mGyrEntry[0]), String.valueOf(mGyrEntry[1]), String.valueOf(mGyrEntry[2]),
                              String.valueOf(mComEntry[0]), String.valueOf(mComEntry[1]), String.valueOf(mComEntry[2]),
-                             String.valueOf(roadTypeInt), String.valueOf(roadQualityInt)};
+                             String.valueOf(mLocation.getSpeed()), String.valueOf(roadTypeInt), String.valueOf(roadQualityInt)};
 //                    accEntry.add(acc_entries);
                      CSV_write("out",acc_entries);
                  }
